@@ -17,7 +17,7 @@ def generate_random_string(length):
 def download_file(url, directory):
     """Download a file from the specified URL and save it to the specified directory"""
     try:
-        with requests.get(url, stream=True, timeout=30) as response:
+        with requests.get(url, stream=True, timeout=60) as response:
             response.raise_for_status()
             filename = os.path.join(directory, generate_random_string(10) + os.path.splitext(url)[1])
             with open(filename, 'wb') as f:
@@ -29,8 +29,9 @@ def download_file(url, directory):
         return 0
 
 
+
 def download_images_and_videos(subreddit, num_posts):
-    """Download all types of images and videos from a specified subreddit"""
+    """Download images and videos from a specified subreddit"""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
     }
@@ -44,35 +45,43 @@ def download_images_and_videos(subreddit, num_posts):
     response = requests.get(url, headers=headers)
     data = response.json()['data']['children']
 
-    pbar = tqdm(total=num_posts, desc=f'Downloading from /r/{subreddit}', dynamic_ncols=True, colour='yellow', unit='KB')
+    pbar = tqdm(total=num_posts, desc=f'Downloading media from /r/{subreddit}', dynamic_ncols=True, colour='yellow', unit='KB')
     total_size = 0
     count = 0
     num_images_videos = 0
+    supported_formats = ['jpg', 'jpeg', 'png', 'gif', 'gifv', 'mp4', 'mov', 'webm', 'webp']
     start_time = time.time()
 
-    for post in data:
-        # get the URL and file type of the post
-        url = post['data']['url']
-        file_type = url.split('.')[-1]
+    while num_images_videos < num_posts:
+        for post in data:
+            # get the URL and file type of the post
+            url = post['data']['url']
+            file_type = url.split('.')[-1]
 
-        # download the file if it's an image or video
-        if file_type in ['jpg', 'jpeg', 'png', 'gif', 'gifv', 'mp4', 'mov', 'webm']:
-            file_size = download_file(url, directory)
-            total_size += file_size
-            if file_size > 0:
-                num_images_videos += 1
-            count += 1
-            pbar.update(1)
+            # download the file if it's an image or video
+            if file_type in supported_formats:
+                file_size = download_file(url, directory)
+                total_size += file_size
+                if file_size > 0:
+                    num_images_videos += 1
+                pbar.update(1)
 
-            if count >= num_posts or num_images_videos >= num_posts:
+            # break loop if reached the number of posts required
+            if num_images_videos >= num_posts:
                 break
+        else:
+            # scrape the next batch of posts if not enough supported formats were found
+            after = data[-1]['data']['name']
+            url = f'https://www.reddit.com/r/{subreddit}/hot.json?limit={num_posts}&after={after}'
+            response = requests.get(url, headers=headers)
+            data = response.json()['data']['children']
 
     if num_images_videos < num_posts:
-        pbar.color = 'red'
+        pbar.colour = 'red'
         pbar.close()
         click.secho(f"\nSome media failed to download\n", bold=True, fg='yellow')
     else:
-        pbar.color = 'green'
+        pbar.colour = 'green'  # Add the colour to the bar format
         pbar.close()
 
     # print total size and time taken to download the files
@@ -80,6 +89,9 @@ def download_images_and_videos(subreddit, num_posts):
     time_taken = time.time() - start_time
     click.secho(f"\nTotal size downloaded: {size_str}", bold=True, fg='green')
     click.secho(f"Time taken: {time_taken:.2f} seconds\n", bold=True, fg='green')
+
+
+
 
 @click.command()
 @click.argument('subreddit')
