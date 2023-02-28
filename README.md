@@ -1,6 +1,10 @@
 # Reddit Suck
 
-Reddit Suck is a command-line tool that allows you to download all types of images and videos from a specified subreddit. 
+<p align="center">
+  <img src="https://i.imgur.com/UMmy5D6.png" alt="Reddit Suck Beast" height="200" width="200">
+</p>
+
+Reddit Suck is a command-line tool that allows you to download all types of images and videos from a specified subreddit.
 
 ## Installation
 
