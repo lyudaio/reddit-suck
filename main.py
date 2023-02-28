@@ -19,7 +19,8 @@ def download_file(url, directory):
     try:
         with requests.get(url, stream=True, timeout=60) as response:
             response.raise_for_status()
-            filename = os.path.join(directory, generate_random_string(10) + os.path.splitext(url)[1])
+            filename = os.path.join(directory, generate_random_string(
+                10) + os.path.splitext(url)[1])
             with open(filename, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
@@ -27,7 +28,6 @@ def download_file(url, directory):
     except requests.exceptions.RequestException as e:
         click.secho(f"Failed to download file: {url} ({str(e)})", fg='red')
         return 0
-
 
 
 def download_images_and_videos(subreddit, num_posts):
@@ -45,11 +45,13 @@ def download_images_and_videos(subreddit, num_posts):
     response = requests.get(url, headers=headers)
     data = response.json()['data']['children']
 
-    pbar = tqdm(total=num_posts, desc=f'Downloading media from /r/{subreddit}', dynamic_ncols=True, colour='yellow', unit='KB')
+    pbar = tqdm(total=num_posts,
+                desc=f'Downloading media from /r/{subreddit}', dynamic_ncols=True, colour='yellow', unit='KB')
     total_size = 0
     count = 0
     num_images_videos = 0
-    supported_formats = ['jpg', 'jpeg', 'png', 'gif', 'gifv', 'mp4', 'mov', 'webm', 'webp']
+    supported_formats = ['jpg', 'jpeg', 'png',
+                         'gif', 'gifv', 'mp4', 'mov', 'webm', 'webp']
     start_time = time.time()
 
     while num_images_videos < num_posts:
@@ -79,7 +81,8 @@ def download_images_and_videos(subreddit, num_posts):
     if num_images_videos < num_posts:
         pbar.colour = 'red'
         pbar.close()
-        click.secho(f"\nSome media failed to download\n", bold=True, fg='yellow')
+        click.secho(f"\nSome media failed to download\n",
+                    bold=True, fg='yellow')
     else:
         pbar.colour = 'green'  # Add the colour to the bar format
         pbar.close()
@@ -88,9 +91,8 @@ def download_images_and_videos(subreddit, num_posts):
     size_str = size(total_size)
     time_taken = time.time() - start_time
     click.secho(f"\nTotal size downloaded: {size_str}", bold=True, fg='green')
-    click.secho(f"Time taken: {time_taken:.2f} seconds\n", bold=True, fg='green')
-
-
+    click.secho(
+        f"Time taken: {time_taken:.2f} seconds\n", bold=True, fg='green')
 
 
 @click.command()
@@ -99,9 +101,11 @@ def download_images_and_videos(subreddit, num_posts):
 def main(subreddit, num_posts):
     if num_posts > 1000:
         num_posts = 1000
-        click.secho("Maximum number of posts is 1000. Downloading 1000 posts...", fg='yellow')
+        click.secho(
+            "Maximum number of posts is 1000. Downloading 1000 posts...", fg='yellow')
 
     download_images_and_videos(subreddit, num_posts)
+
 
 if __name__ == '__main__':
     main()
