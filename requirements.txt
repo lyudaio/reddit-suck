@@ -9,7 +9,7 @@ praw==7.7.0
 prawcore==2.3.0
 requests==2.31.0
 soupsieve==2.4
-tqdm==4.64.1
+tqdm==4.65.0
 update-checker==0.18.0
 urllib3==2.0.3
 websocket-client==1.5.1
