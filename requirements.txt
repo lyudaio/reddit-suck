@@ -5,7 +5,7 @@ click==8.1.4
 hurry.filesize==0.9
 idna==3.4
 Pillow==10.0.0
-praw==7.7.0
+praw==7.7.1
 prawcore==2.3.0
 requests==2.31.0
 soupsieve==2.4
